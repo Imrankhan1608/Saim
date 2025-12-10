@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <h1>Apprenez différemment, réussissez durablement</h1>
+
+    <div id="ultime">
+
+        <div id="form">
+
+            <div id="menue">
+                <button onclick="openSection('search')">Rechercher un fichier</button>
+                <button onclick="openSection('formcours')">Voir les cours</button>
+                <button onclick="openSection('formexo')">Pour s'entraîner</button>
+            </div>
+
+            <div id="search" class="section">
+                <button class="retour" onclick="goBack()">← Retour</button>
+                <label>Rechercher</label>
+                <input type="search" placeholder="Nom du fichier...">
+            </div>
+
+            <form id="formcours" class="section">
+                 <button class="retour" onclick="goBack()">← Retour</button>
+                <h2>Des cours personnalisés pour révéler ton potentiel</h2>
+
+                <select name="niveau">
+                    <option value="l1">Première année</option>
+                    <option value="l2">Deuxième année</option>
+                    <option value="l3">Troisième année</option>
+                    <option value="m1">Master 1</option>
+                    <option value="m2">Master 2</option>
+                </select>
+
+               <!-- avant -->
+<label>Matière :</label>
+<input type="text" placeholder="ex : Sécurité réseau">
+
+<!-- après JS, il sera remplacé par un select dynamique -->
+
+
+                <label>Année scolaire :</label>
+                <select name="annes">
+                    <option value="2024_2025">2024-2025</option>
+                    <option value="2025_2026">2025-2026</option>
+                </select>
+
+                <button type="submit" id="butsou">Soumettre</button>
+            </form>
+
+            <form id="formexo" class="section">
+                <button class="retour" onclick="goBack()">← Retour</button>
+                <h2>Des exercices pour t'entraîner efficacement</h2>
+
+                <select name="niveau">
+                    <option value="l1">Première année</option>
+                    <option value="l2">Deuxième année</option>
+                </select>
+
+               <!-- avant -->
+<label>Matière :</label>
+<input type="text" placeholder="ex : Sécurité réseau">
+
+<!-- après JS, il sera remplacé par un select dynamique -->
+
+
+                <label>Année scolaire :</label>
+                <select name="annes">
+                    <option value="2024_2025">2024-2025</option>
+                    <option value="2025_2026">2025-2026</option>
+                </select>
+
+                <button type="submit" id="butsou">Soumettre</button>
+            </form>
+
+        </div>
+
+        <div id="affichage">
+            
+        </div>
+
+    </div>
+
+    <script src="script.js"></script>
+
+</body>
+</html>

@@ -1,258 +1,108 @@
 <?php
-ini_set('display_errors',1);
+session_start();
+ini_set('display_errors', 1);
 error_reporting(E_ALL);
-// verif isset pour l'inscription
-if (isset($_POST['nom']) && isset($_POST['prenom']) && isset($_POST['matricule']) && isset($_POST['pass']) && isset($_POST['niveau'])) {
-    // variables //
-$user = 'root';
-$pass = '';
-$nom = $_POST['nom'];
-$prenom = $_POST['prenom'];
-$niveau = $_POST['niveau'];
-$matricule = $_POST['matricule'];
-$passe = $_POST['pass'];
 
-    try {
-        $stmt = new PDO('mysql:host=localhost;dbname=saim','$user','$pass');
-        $req = $stmt->prepare("INSERT INTO eleves (nom,prenom,niveau,matricule,pass) VALUES ('$nom',
-        '$prenom','$niveau','$matricule','$passe')");
-        $req->execute();
-        echo"enregistrement reussi !"."</br>";
-    }
-    catch (PDOException $e){
-     echo"Erreur".$e->getMessage()."</br>";
-    }
-    die(
-        header("location:erreur.html")
-    );
+$message = '';
+$typeMessage = '';
 
-// pour les connexion //
-
-
-
-
-
+// Redirection si déjà connecté
+if(isset($_SESSION['prenom'])){
+    header("Location: index.php");
+    exit;
 }
 
+// Connexion à la base
+try {
+    $pdo = new PDO('mysql:host=localhost;dbname=saim', 'root', '');
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch(PDOException $e){
+    die("Erreur de connexion : " . $e->getMessage());
+}
 
+// Vérification formulaire
+if($_SERVER['REQUEST_METHOD'] === 'POST'){
+    $matricule = $_POST['matricule'] ?? '';
+    $pass = $_POST['pass'] ?? '';
 
+    $stmt = $pdo->prepare("SELECT * FROM eleves WHERE matricule=?");
+    $stmt->execute([$matricule]);
+    $eleve = $stmt->fetch(PDO::FETCH_ASSOC);
 
-
-
-
-
-
+    if($eleve && password_verify($pass, $eleve['pass'])){
+        $_SESSION['prenom'] = $eleve['prenom'];
+        $_SESSION['matricule'] = $eleve['matricule'];
+        $message = "Connexion réussie ! Bienvenue " . htmlspecialchars($eleve['prenom']) . ".";
+        $typeMessage = "success";
+        header("refresh:2;url=index.php"); // redirection après 2 secondes
+    } else {
+        $message = "Matricule ou mot de passe incorrect.";
+        $typeMessage = "error";
+    }
+}
 ?>
-
-
-
-
 <!DOCTYPE html>
 <html lang="fr">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Saim - Connexion / Inscription</title>
-    <link rel="stylesheet" href="index.css">
-    <style>
-        body {
-            font-family: 'Segoe UI', system-ui, sans-serif;
-        }
-
-        /* Conteneur principal centré */
-        .conteneur-auth {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 120px 20px 80px;
-        }
-
-        /* Carte du formulaire */
-        .carte-auth {
-            background: linear-gradient(to right, #e0e0e0, #ffffff);
-            padding: 50px 40px;
-            border-radius: 12px;
-            border: 2px solid #000;
-            width: 100%;
-            max-width: 520px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
-        }
-
-        .carte-auth h1 {
-            font-family: 'Bell MT', serif;
-            font-size: 3.2rem;
-            font-weight: bold;
-            text-align: center;
-            margin-bottom: 10px;
-            color: #000;
-        }
-
-        /* Texte de bascule */
-        .texte-bascule {
-            text-align: center;
-            margin-bottom: 30px;
-            color: #333;
-            font-size: 1.1rem;
-        }
-
-        .lien-bascule {
-            color: #000;
-            font-weight: 600;
-            cursor: pointer;
-            text-decoration: underline;
-        }
-
-        /* Groupe de champ */
-        .groupe-champ {
-            margin-bottom: 20px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #111;
-        }
-
-        input,
-        select {
-            width: 100%;
-            padding: 14px 16px;
-            border: 2px solid #000;
-            border-radius: 8px;
-            font-size: 1rem;
-            background: transparent;
-            color: #000;
-        }
-
-        input:focus,
-        select:focus {
-            outline: none;
-            background: rgba(0, 0, 0, 0.03);
-        }
-
-        /* Caché */
-        .caché {
-            display: none;
-        }
-
-        /* Bouton pleine largeur */
-        .btn-plein {
-            width: 100%;
-            margin-top: 10px;
-            text-align: center;
-        }
-
-        /* Retour accueil */
-        .retour-accueil {
-            display: block;
-            text-align: center;
-            margin-top: 30px;
-            color: #000;
-            font-weight: 600;
-            text-decoration: none;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Connexion</title>
+<style>
+body { font-family:'Segoe UI',sans-serif; background:#f5f5f5; margin:0; padding:0; }
+.conteneur-auth { display:flex; justify-content:center; align-items:center; min-height:100vh; padding:20px; }
+.carte-auth { background:linear-gradient(to right,#e0e0e0,#fff); padding:30px; border-radius:12px; border:2px solid #000; width:100%; max-width:450px; box-shadow:0 10px 20px rgba(0,0,0,0.1);}
+h1 { text-align:center; margin-bottom:15px; color:#000; }
+.groupe-champ { margin-bottom:15px; position:relative; }
+label { display:block; margin-bottom:5px; font-weight:600; color:#111; }
+input { width:100%; padding:10px 40px 10px 10px; border:2px solid #000; border-radius:6px; background:transparent; color:#000; }
+.btn-plein { width:100%; padding:12px; font-weight:bold; cursor:pointer; margin-top:10px; }
+.alerte { padding:12px 16px; margin-bottom:15px; border-radius:8px; font-weight:600; text-align:center; }
+.alerte.success { background-color:#d4edda; color:#155724; border:1px solid #c3e6cb; }
+.alerte.error { background-color:#f8d7da; color:#721c24; border:1px solid #f5c6cb; }
+.retour { display:block; text-align:center; margin-top:20px; text-decoration:none; font-weight:600; color:#000; }
+.show-pass { position:absolute; right:10px; top:38px; cursor:pointer; font-size:18px; color:#555; user-select:none; }
+</style>
 </head>
-
 <body>
 
-    <nav class="barre_navigation" id="nav_bar">
-        <div class="logo">Saim</div>
-        <div class="menu_navigation" id="menu">
-            <a href="acceuil.html">Accueil</a>
-            <a href="#filtre">Filtre</a>
-            <a href="#apropos">À propos</a>
+<div class="conteneur-auth">
+    <div class="carte-auth">
+        <h1>Connexion</h1>
+
+        <?php if($message): ?>
+        <div class="alerte <?= $typeMessage ?>">
+            <?= htmlspecialchars($message) ?>
         </div>
-        <div class="bouton_menu" id="bouton_menu">
-            <span class="barre"></span>
-            <span class="barre"></span>
-            <span class="barre"></span>
-        </div>
-    </nav>
+        <?php endif; ?>
 
-    <div class="conteneur-auth">
-        <div class="carte-auth">
-
-            <h1 id="titre-formulaire">Connexion</h1>
-            <p class="texte-bascule" id="texte-bascule">
-                Pas encore de compte ? <span class="lien-bascule" id="lien-bascule">S’inscrire</span>
-            </p>
-
-            <form id="formulaire-auth" method="post">
-
-                <div class="groupe-champ">
-                    <label>Numéro matricule</label>
-                    <input type="text" required name="matricule">
-                </div>
-
-                <div class="groupe-champ">
-                    <label>Mot de passe</label>
-                    <input type="password" required name="pass">
-                </div>
-
-                <!-- Champs supplémentaires pour l'inscription -->
-                <div id="champs-inscription" class="caché">
-                    <div class="groupe-champ">
-                        <label>Nom</label>
-                        <input type="text" name="nom">
-                    </div>
-                    <div class="groupe-champ">
-                        <label>Prénom</label>
-                        <input type="text" name="prenom">
-                    </div>
-                    <div class="groupe-champ">
-                        <label>Niveau</label>
-                        <select name="Niveau">
-                            <option value="L1">L1 Informatique</option>
-                            <option value="L2">L2 Informatique</option>
-                        </select>
-                    </div>
-                </div>
-
-                <button type="submit" class="btn btn-plein" id="bouton-soumettre">
-                    Se connecter
-                </button>
-            </form>
-
-            <a href="acceuil.html" class="retour-accueil">← Retour à l’accueil</a>
-        </div>
+        <form method="post" id="form-connexion">
+            <div class="groupe-champ">
+                <label>Numéro matricule</label>
+                <input type="text" name="matricule" required>
+            </div>
+            <div class="groupe-champ">
+                <label>Mot de passe</label>
+                <input type="password" name="pass" id="pass" required>
+                <span class="show-pass" onclick="togglePass('pass')">&#128065;</span>
+            </div>
+            <button type="submit" class="btn-plein">Se connecter</button>
+        </form>
+        <a class="retour" href="inscription.php">Pas encore de compte ? S’inscrire</a>
     </div>
+</div>
 
-    <script src="index.js"></script>
-    <script>
-        // Sélection des éléments (en français)
-        const titre = document.getElementById('titre-formulaire');
-        const texteBascule = document.getElementById('texte-bascule');
-        const champsExtra = document.getElementById('champs-inscription');
-        const boutonSubmit = document.getElementById('bouton-soumettre');
+<script>
+function togglePass(id){
+    const input = document.getElementById(id);
+    input.type = input.type === 'password' ? 'text' : 'password';
+}
 
-        function basculerMode() {
-            const estConnexion = titre.textContent === "Connexion";
+// Faire disparaître le message après 3 secondes
+const alerte = document.querySelector('.alerte');
+if(alerte){
+    setTimeout(()=>{ alerte.style.display='none'; },3000);
+}
+</script>
 
-            if (estConnexion) {
-                // Passe en mode Inscription
-                titre.textContent = "Inscription";
-                texteBascule.innerHTML = 'Déjà un compte ? <span class="lien-bascule">Se connecter</span>';
-                champsExtra.classList.remove('caché');
-                boutonSubmit.textContent = "S’inscrire";
-            } else {
-                // Passe en mode Connexion
-                titre.textContent = "Connexion";
-                texteBascule.innerHTML = 'Pas encore de compte ? <span class="lien-bascule">S’inscrire</span>';
-                champsExtra.classList.add('caché');
-                boutonSubmit.textContent = "Se connecter";
-            }
-
-            // Ré-attache l'écouteur au nouveau lien créé
-            document.querySelector('.lien-bascule').addEventListener('click', basculerMode);
-        }
-
-        // Écouteur initial
-        document.getElementById('lien-bascule').addEventListener('click', basculerMode);
-    </script>
 </body>
-
 </html>

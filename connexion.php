@@ -29,6 +29,15 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
     $stmt->execute([$matricule]);
     $eleve = $stmt->fetch(PDO::FETCH_ASSOC);
 
+     // ===== CONNEXION ADMIN (ROOT) =====
+    if ($matricule === 'D00' && $pass === 'root@1234') {
+        $_SESSION['admin'] = true;
+        $_SESSION['prenom'] = 'Administrateur';
+        header("Location: upload.php");
+        exit;
+    }
+    // ===== FIN ADMIN =====
+
     if($eleve && password_verify($pass, $eleve['pass'])){
         $_SESSION['prenom'] = $eleve['prenom'];
         $_SESSION['matricule'] = $eleve['matricule'];

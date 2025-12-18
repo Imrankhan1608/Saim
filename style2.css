@@ -26,6 +26,7 @@ h1 {
     max-width: 1200px;
     margin: auto;
     padding: 20px;
+    font-family: monospace;
 }
 #form {
     flex: 1 1 350px;
@@ -51,6 +52,7 @@ h1 {
     border-radius: 8px;
     cursor: pointer;
     transition: 0.2s;
+    
 }
 #menue button:hover {
     background: #555;
